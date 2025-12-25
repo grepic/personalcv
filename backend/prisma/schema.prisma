@@ -1,0 +1,488 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Role {
+  CANDIDATE
+  FREELANCER
+  COMPANY
+}
+
+enum PostType {
+  STATUS
+  PORTFOLIO
+  JOB
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStatus {
+  NEW
+  VIEWED
+  INTERVIEW
+  REJECTED
+  HIRED
+}
+
+enum NotificationType {
+  JOB_POSTED
+  COMMENT
+  MESSAGE
+  PORTFOLIO_LIKE
+  APPLICATION_UPDATE
+  MENTION
+}
+
+enum Recommendation {
+  STRONG_HIRE
+  HIRE
+  NEUTRAL
+  NO_HIRE
+}
+
+enum CommentAnchorType {
+  EXPERIENCE
+  EDUCATION
+  SKILL
+  PROJECT
+  GENERAL
+}
+
+enum CompanySize {
+  SIZE_1_10
+  SIZE_11_50
+  SIZE_51_200
+  SIZE_201_1000
+  SIZE_1000_PLUS
+}
+
+// ============================================
+// USER & PROFILE
+// ============================================
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  displayName     String
+  headline        String?
+  avatarUrl       String?
+  location        String?
+  roles           Role[]
+  isLookingForJob Boolean   @default(false)
+  isOfferingFreelance Boolean @default(false)
+  templateId      String    @default("minimal_light")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Company specific fields
+  companyName     String?
+  companySize     CompanySize?
+  industry        String?
+  websiteUrl      String?
+  about           String?
+
+  // Relations
+  refreshTokens   RefreshToken[]
+  skills          UserSkill[]
+  languages       UserLanguage[]
+  education       Education[]
+  experience      Experience[]
+  certifications  Certification[]
+  portfolioProjects PortfolioProject[]
+  services        FreelancerService[]
+  posts           Post[]
+  jobsPosted      Job[]
+  applications    Application[]
+  notifications   Notification[]
+  preferences     UserPreferences?
+  followingCompanies UserFollowCompany[]
+  followingRoles  UserFollowRole[]
+  candidateReviews CandidateReview[]
+  candidateComments CandidateComment[] @relation("CommentAuthor")
+  commentsReceived CandidateComment[] @relation("CommentCandidate")
+  conversationParticipants ConversationParticipant[]
+  messagesSent    Message[]
+
+  @@index([email])
+  @@index([roles])
+  @@index([isLookingForJob])
+  @@index([isOfferingFreelance])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+// ============================================
+// PROFILE DATA (CV)
+// ============================================
+
+model UserSkill {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([name])
+}
+
+model UserLanguage {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+  level  String // e.g., "Native", "Fluent", "Professional", "Basic"
+
+  @@index([userId])
+}
+
+model Education {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school      String
+  degree      String
+  field       String?
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+
+  @@index([userId])
+}
+
+model Experience {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  companyName String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  description String?
+
+  @@index([userId])
+}
+
+model Certification {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title  String
+  issuer String
+  date   DateTime
+  url    String?
+
+  @@index([userId])
+}
+
+model PortfolioProject {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  mediaUrls   String[] // Array of image/video URLs
+  externalUrl String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ============================================
+// FREELANCER SERVICES
+// ============================================
+
+model FreelancerService {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  description  String
+  price        Float
+  currency     String   @default("USD")
+  deliveryTime String   // e.g., "5 days"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================
+// POSTS & FEED
+// ============================================
+
+model Post {
+  id         String   @id @default(cuid())
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  type       PostType
+  title      String?
+  content    String
+  mediaUrls  String[]
+  tags       String[]
+  visibility String   @default("public") // "public" | "followers_only"
+  jobId      String?  @unique
+  job        Job?     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ============================================
+// JOBS
+// ============================================
+
+model Job {
+  id             String         @id @default(cuid())
+  companyId      String
+  company        User           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  employmentType EmploymentType
+  location       String
+  isRemote       Boolean        @default(false)
+  salaryMin      Float?
+  salaryMax      Float?
+  currency       String?
+  status         JobStatus      @default(OPEN)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  skills         JobSkill[]
+  applications   Application[]
+  post           Post?
+
+  @@index([companyId])
+  @@index([status])
+  @@index([employmentType])
+  @@index([location])
+  @@index([isRemote])
+  @@index([createdAt])
+}
+
+model JobSkill {
+  id    String @id @default(cuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name  String
+
+  @@unique([jobId, name])
+  @@index([jobId])
+  @@index([name])
+}
+
+// ============================================
+// APPLICATIONS
+// ============================================
+
+model Application {
+  id          String            @id @default(cuid())
+  jobId       String
+  job         Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   User              @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  companyId   String
+  status      ApplicationStatus @default(NEW)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([jobId, candidateId])
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([companyId])
+  @@index([status])
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  data      Json // Flexible data field for notification details
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// ============================================
+// USER PREFERENCES & FOLLOWING
+// ============================================
+
+model UserPreferences {
+  id                              String  @id @default(cuid())
+  userId                          String  @unique
+  user                            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifyJobsFromFollowedCompanies Boolean @default(true)
+  notifyJobsMatchingSkills        Boolean @default(true)
+}
+
+model UserFollowCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, companyId])
+  @@index([userId])
+  @@index([companyId])
+}
+
+model UserFollowRole {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleKeyword String
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, roleKeyword])
+  @@index([userId])
+  @@index([roleKeyword])
+}
+
+// ============================================
+// CANDIDATE REVIEWS (Company Internal)
+// ============================================
+
+model CandidateReview {
+  id                     String         @id @default(cuid())
+  candidateId            String
+  candidate              User           @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  companyId              String
+  jobId                  String?
+  authorId               String
+  round                  Int
+  title                  String
+  hardSkills             Int?           // 1-5
+  softSkills             Int?           // 1-5
+  language               Int?           // 1-5
+  cultureFit             Int?           // 1-5
+  overallRecommendation  Recommendation
+  summary                String
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  @@index([candidateId])
+  @@index([companyId])
+  @@index([jobId])
+}
+
+// ============================================
+// CANDIDATE COMMENTS (Company Internal)
+// ============================================
+
+model CandidateComment {
+  id              String            @id @default(cuid())
+  candidateId     String
+  candidate       User              @relation("CommentCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  companyId       String
+  jobId           String?
+  authorId        String
+  author          User              @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  anchorType      CommentAnchorType
+  anchorId        String?           // ID of specific CV item
+  text            String
+  parentCommentId String?
+  parentComment   CandidateComment? @relation("CommentThread", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         CandidateComment[] @relation("CommentThread")
+  resolved        Boolean           @default(false)
+  resolvedBy      String?
+  resolvedAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([candidateId])
+  @@index([companyId])
+  @@index([jobId])
+  @@index([authorId])
+  @@index([parentCommentId])
+}
+
+// ============================================
+// MESSAGING
+// ============================================
+
+model Conversation {
+  id            String                    @id @default(cuid())
+  createdAt     DateTime                  @default(now())
+  lastMessageAt DateTime                  @default(now())
+  participants  ConversationParticipant[]
+  messages      Message[]
+
+  @@index([lastMessageAt])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([conversationId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  text           String
+  createdAt      DateTime     @default(now())
+  readAt         DateTime?
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+}
