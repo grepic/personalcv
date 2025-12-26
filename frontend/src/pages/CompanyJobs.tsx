@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Job } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function CompanyJobs() {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +33,10 @@ export default function CompanyJobs() {
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">My Jobs</h1>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+          <button
+            onClick={() => navigate('/company/jobs/create')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
             Post New Job
           </button>
         </div>

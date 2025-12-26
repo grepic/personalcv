@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { UserProfile } from '../types';
 import { format } from 'date-fns';
+import { useAuthStore } from '../store/authStore';
+import FollowCompanyButton from '../components/FollowCompanyButton';
 
 export default function Profile() {
   const { userId } = useParams();
+  const { user } = useAuthStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isOwnProfile = user?.id === userId;
+  const isCompany = profile?.roles.includes('COMPANY');
 
   useEffect(() => {
     loadProfile();
@@ -45,7 +51,22 @@ export default function Profile() {
             {profile.displayName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold mb-2">{profile.displayName}</h1>
+            <div className="flex items-start justify-between">
+              <h1 className="text-3xl font-bold mb-2">{profile.displayName}</h1>
+              <div className="flex gap-2">
+                {!isOwnProfile && isCompany && userId && (
+                  <FollowCompanyButton companyId={userId} />
+                )}
+                {isOwnProfile && (
+                  <Link
+                    to="/profile/edit"
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  >
+                    Edit Profile
+                  </Link>
+                )}
+              </div>
+            </div>
             {profile.headline && (
               <p className="text-xl text-gray-700 mb-2">{profile.headline}</p>
             )}

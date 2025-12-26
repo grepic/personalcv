@@ -130,7 +130,7 @@ export default function Layout() {
                       My Jobs
                     </Link>
                     <Link
-                      to="/users/search?role=candidate"
+                      to="/search?role=CANDIDATE"
                       className="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-md transition"
                     >
                       Find Candidates

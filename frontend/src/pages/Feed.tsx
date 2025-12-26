@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { Post } from '../types';
 import { formatDistanceToNow } from 'date-fns';
+import CreatePostForm from '../components/CreatePostForm';
 
 export default function Feed() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [showCreatePost, setShowCreatePost] = useState(false);
 
   useEffect(() => {
     loadPosts();
@@ -89,7 +91,15 @@ export default function Feed() {
   return (
     <div>
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <h2 className="text-xl font-bold mb-4">Feed</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Feed</h2>
+          <button
+            onClick={() => setShowCreatePost(!showCreatePost)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            {showCreatePost ? 'Cancel' : 'Create Post'}
+          </button>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => setFilter('all')}
@@ -123,6 +133,18 @@ export default function Feed() {
           </button>
         </div>
       </div>
+
+      {showCreatePost && (
+        <div className="mb-6">
+          <CreatePostForm
+            onPostCreated={() => {
+              setShowCreatePost(false);
+              loadPosts();
+            }}
+            onCancel={() => setShowCreatePost(false)}
+          />
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-8">Loading...</div>

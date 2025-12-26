@@ -13,7 +13,10 @@ import Messages from './pages/Messages';
 import Settings from './pages/Settings';
 import Layout from './components/Layout';
 import CompanyJobs from './pages/CompanyJobs';
+import CreateJob from './pages/CreateJob';
 import CandidateView from './pages/CandidateView';
+import ProfileEdit from './pages/ProfileEdit';
+import Search from './pages/Search';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -74,9 +77,12 @@ function App() {
           <Route path="jobs" element={<Jobs />} />
           <Route path="jobs/:jobId" element={<JobDetail />} />
           <Route path="profile/:userId" element={<Profile />} />
+          <Route path="profile/edit" element={<ProfileEdit />} />
           <Route path="messages" element={<Messages />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="search" element={<Search />} />
           <Route path="company/jobs" element={<CompanyJobs />} />
+          <Route path="company/jobs/create" element={<CreateJob />} />
           <Route path="candidates/:candidateId" element={<CandidateView />} />
         </Route>
       </Routes>

@@ -3,12 +3,15 @@ import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import { UserProfile, CandidateReview, CandidateComment } from '../types';
 import Profile from './Profile';
+import AddReviewForm from '../components/AddReviewForm';
+import AddCommentForm from '../components/AddCommentForm';
 
 export default function CandidateView() {
   const { candidateId } = useParams();
   const [reviews, setReviews] = useState<CandidateReview[]>([]);
   const [comments, setComments] = useState<CandidateComment[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showCommentForm, setShowCommentForm] = useState(false);
 
   useEffect(() => {
     loadReviews();
@@ -46,9 +49,22 @@ export default function CandidateView() {
             onClick={() => setShowReviewForm(!showReviewForm)}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
           >
-            Add Review
+            {showReviewForm ? 'Cancel' : 'Add Review'}
           </button>
         </div>
+
+        {showReviewForm && candidateId && (
+          <div className="mb-4">
+            <AddReviewForm
+              candidateId={candidateId}
+              onSuccess={() => {
+                setShowReviewForm(false);
+                loadReviews();
+              }}
+              onCancel={() => setShowReviewForm(false)}
+            />
+          </div>
+        )}
 
         {reviews.length === 0 ? (
           <p className="text-gray-500">No reviews yet</p>
@@ -108,7 +124,30 @@ export default function CandidateView() {
 
       {/* Internal Comments (Company Only) */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-4">Internal Comments</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Internal Comments</h2>
+          <button
+            onClick={() => setShowCommentForm(!showCommentForm)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            {showCommentForm ? 'Cancel' : 'Add Comment'}
+          </button>
+        </div>
+
+        {showCommentForm && candidateId && (
+          <div className="mb-4">
+            <AddCommentForm
+              candidateId={candidateId}
+              anchorType="GENERAL"
+              onSuccess={() => {
+                setShowCommentForm(false);
+                loadComments();
+              }}
+              onCancel={() => setShowCommentForm(false)}
+            />
+          </div>
+        )}
+
         {comments.length === 0 ? (
           <p className="text-gray-500">No comments yet</p>
         ) : (
