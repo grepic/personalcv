@@ -4,6 +4,7 @@ import api from '../services/api';
 import { Post } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 import CreatePostForm from '../components/CreatePostForm';
+import PostReactions from '../components/PostReactions';
 import { useAuthStore } from '../store/authStore';
 
 export default function Feed() {
@@ -110,8 +111,24 @@ export default function Feed() {
           </div>
         </div>
 
-      {post.title && <h3 className="text-lg font-semibold mb-2">{post.title}</h3>}
-      <p className="text-gray-700 whitespace-pre-wrap mb-3">{post.content}</p>
+      {post.title && (
+        <Link to={`/posts/${post.id}`} className="hover:text-primary-600 transition">
+          <h3 className="text-lg font-semibold mb-2">{post.title}</h3>
+        </Link>
+      )}
+      <Link to={`/posts/${post.id}`} className="block">
+        <p className="text-gray-700 whitespace-pre-wrap mb-3 hover:text-gray-900">
+          {post.content.length > 300 ? `${post.content.substring(0, 300)}...` : post.content}
+        </p>
+      </Link>
+      {post.content.length > 300 && (
+        <Link
+          to={`/posts/${post.id}`}
+          className="text-primary-600 hover:text-primary-700 text-sm font-medium mb-3 inline-block"
+        >
+          Read more
+        </Link>
+      )}
 
       {post.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
@@ -139,6 +156,11 @@ export default function Feed() {
           )}
         </Link>
       )}
+
+      {/* Reactions */}
+      <div className="mt-3 pt-3 border-t border-gray-200">
+        <PostReactions postId={post.id} />
+      </div>
       </div>
     );
   };

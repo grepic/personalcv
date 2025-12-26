@@ -9,6 +9,7 @@ import CompanyReviews from '../components/CompanyReviews';
 import PortfolioManager from '../components/PortfolioManager';
 import ServicesManager from '../components/ServicesManager';
 import Recommendations from '../components/Recommendations';
+import SkillBadge from '../components/SkillBadge';
 
 export default function Profile() {
   const { userId } = useParams();
@@ -159,12 +160,13 @@ export default function Profile() {
           <h2 className="text-xl font-semibold mb-4">Skills</h2>
           <div className="flex flex-wrap gap-2">
             {profile.skills.map((skill) => (
-              <span
+              <SkillBadge
                 key={skill.id}
-                className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md"
-              >
-                {skill.name}
-              </span>
+                skillId={skill.id}
+                skillName={skill.name}
+                userId={profile.id}
+                isOwnProfile={isOwnProfile}
+              />
             ))}
           </div>
         </div>

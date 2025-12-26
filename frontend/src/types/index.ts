@@ -300,3 +300,42 @@ export interface UserRecommendation {
   createdAt: string;
   updatedAt: string;
 }
+
+export type ReactionType = 'like' | 'love' | 'celebrate' | 'insightful' | 'curious';
+
+export interface PostReaction {
+  id: string;
+  postId: string;
+  userId: string;
+  type: ReactionType;
+  createdAt: string;
+}
+
+export interface PostReactionsSummary {
+  total: number;
+  byType: Record<string, number>;
+  userReaction: ReactionType | null;
+}
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  authorId: string;
+  author?: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+    headline?: string;
+  };
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SavedJob {
+  id: string;
+  userId: string;
+  jobId: string;
+  job: Job;
+  createdAt: string;
+}

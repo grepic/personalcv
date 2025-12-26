@@ -4,6 +4,7 @@ import api from '../services/api';
 import { Job } from '../types';
 import { useAuthStore } from '../store/authStore';
 import { formatDistanceToNow } from 'date-fns';
+import SaveJobButton from '../components/SaveJobButton';
 
 export default function JobDetail() {
   const { jobId } = useParams();
@@ -89,15 +90,18 @@ export default function JobDetail() {
         )}
       </div>
 
-      {canApply && (
-        <button
-          onClick={handleApply}
-          disabled={applying}
-          className="mb-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition"
-        >
-          {applying ? 'Applying...' : 'Apply Now'}
-        </button>
-      )}
+      <div className="flex gap-3 mb-6">
+        {canApply && (
+          <button
+            onClick={handleApply}
+            disabled={applying}
+            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition"
+          >
+            {applying ? 'Applying...' : 'Apply Now'}
+          </button>
+        )}
+        {jobId && <SaveJobButton jobId={jobId} />}
+      </div>
 
       {hasApplied && (
         <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-md">

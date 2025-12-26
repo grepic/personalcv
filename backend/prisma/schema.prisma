@@ -130,6 +130,8 @@ model User {
   companyReviewsReceived CompanyReview[] @relation("ReviewedCompany")
   recommendationsGiven Recommendation[] @relation("GivenRecommendations")
   recommendationsReceived Recommendation[] @relation("ReceivedRecommendations")
+  postComments    PostComment[]
+  savedJobs       SavedJob[]
 
   @@index([email])
   @@index([roles])
@@ -154,14 +156,27 @@ model RefreshToken {
 // ============================================
 
 model UserSkill {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name   String
+  id           String              @id @default(cuid())
+  userId       String
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  endorsements SkillEndorsement[]
 
   @@unique([userId, name])
   @@index([userId])
   @@index([name])
+}
+
+model SkillEndorsement {
+  id        String    @id @default(cuid())
+  skillId   String
+  skill     UserSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  endorserId String
+  createdAt DateTime  @default(now())
+
+  @@unique([skillId, endorserId]) // One endorsement per skill per user
+  @@index([skillId])
+  @@index([endorserId])
 }
 
 model UserLanguage {
@@ -289,8 +304,40 @@ model Post {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  // Relations
+  reactions  PostReaction[]
+  comments   PostComment[]
+
   @@index([authorId])
   @@index([type])
+  @@index([createdAt])
+}
+
+model PostReaction {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  type      String   @default("like") // "like", "love", "celebrate", "insightful", "curious"
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId]) // One reaction per user per post
+  @@index([postId])
+  @@index([userId])
+}
+
+model PostComment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([authorId])
   @@index([createdAt])
 }
 
@@ -318,12 +365,27 @@ model Job {
   skills         JobSkill[]
   applications   Application[]
   post           Post?
+  savedBy        SavedJob[]
 
   @@index([companyId])
   @@index([status])
   @@index([employmentType])
   @@index([location])
   @@index([isRemote])
+  @@index([createdAt])
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, jobId]) // One save per user per job
+  @@index([userId])
+  @@index([jobId])
   @@index([createdAt])
 }
 

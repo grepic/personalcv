@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { Job } from '../types';
 import { formatDistanceToNow } from 'date-fns';
+import SaveJobButton from '../components/SaveJobButton';
 
 export default function Jobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -33,18 +34,15 @@ export default function Jobs() {
   };
 
   const JobCard = ({ job }: { job: Job }) => (
-    <Link
-      to={`/jobs/${job.id}`}
-      className="block bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition mb-4"
-    >
+    <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition mb-4">
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
           <span className="text-xl font-bold text-blue-600">
             {job.company?.companyName?.charAt(0) || job.company?.displayName.charAt(0)}
           </span>
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">{job.title}</h3>
+        <Link to={`/jobs/${job.id}`} className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1 hover:text-blue-600">{job.title}</h3>
           <p className="text-gray-600 mb-2">
             {job.company?.companyName || job.company?.displayName}
           </p>
@@ -63,9 +61,12 @@ export default function Jobs() {
           <p className="text-xs text-gray-500 mt-2">
             Posted {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
           </p>
+        </Link>
+        <div>
+          <SaveJobButton jobId={job.id} variant="icon" />
         </div>
       </div>
-    </Link>
+    </div>
   );
 
   return (

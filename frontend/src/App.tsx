@@ -9,6 +9,7 @@ import Feed from './pages/Feed';
 import Profile from './pages/Profile';
 import Jobs from './pages/Jobs';
 import JobDetail from './pages/JobDetail';
+import PostDetail from './pages/PostDetail';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
 import Layout from './components/Layout';
@@ -74,6 +75,7 @@ function App() {
         >
           <Route index element={<Feed />} />
           <Route path="feed" element={<Feed />} />
+          <Route path="posts/:postId" element={<PostDetail />} />
           <Route path="jobs" element={<Jobs />} />
           <Route path="jobs/:jobId" element={<JobDetail />} />
           <Route path="profile/:userId" element={<Profile />} />
