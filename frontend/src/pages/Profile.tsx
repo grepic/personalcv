@@ -6,6 +6,8 @@ import { format } from 'date-fns';
 import { useAuthStore } from '../store/authStore';
 import FollowCompanyButton from '../components/FollowCompanyButton';
 import CompanyReviews from '../components/CompanyReviews';
+import PortfolioManager from '../components/PortfolioManager';
+import ServicesManager from '../components/ServicesManager';
 
 export default function Profile() {
   const { userId } = useParams();
@@ -15,6 +17,7 @@ export default function Profile() {
 
   const isOwnProfile = user?.id === userId;
   const isCompany = profile?.roles.includes('COMPANY');
+  const isFreelancer = profile?.roles.includes('FREELANCER');
 
   useEffect(() => {
     loadProfile();
@@ -167,49 +170,13 @@ export default function Profile() {
       )}
 
       {/* Freelancer Services */}
-      {profile.services && profile.services.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {profile.services.map((service) => (
-              <div key={service.id} className="border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-lg mb-2">{service.name}</h3>
-                <p className="text-gray-700 mb-3">{service.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold text-blue-600">
-                    ${service.price} {service.currency}
-                  </span>
-                  <span className="text-sm text-gray-600">{service.deliveryTime}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {isFreelancer && userId && (
+        <ServicesManager userId={userId} isOwnProfile={isOwnProfile} />
       )}
 
       {/* Portfolio Projects */}
-      {profile.portfolioProjects && profile.portfolioProjects.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">Portfolio</h2>
-          <div className="space-y-6">
-            {profile.portfolioProjects.map((project) => (
-              <div key={project.id}>
-                <h3 className="text-lg font-semibold">{project.title}</h3>
-                <p className="text-gray-700 mt-2">{project.description}</p>
-                {project.externalUrl && (
-                  <a
-                    href={project.externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 mt-2 inline-block"
-                  >
-                    View Project →
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+      {userId && (
+        <PortfolioManager userId={userId} isOwnProfile={isOwnProfile} />
       )}
 
       {/* Company Reviews */}
