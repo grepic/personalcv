@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import Autocomplete from './Autocomplete';
+import { CITIES } from '../data/autocompleteData';
 
 export default function CreateJobForm() {
   const navigate = useNavigate();
@@ -131,15 +133,15 @@ export default function CreateJobForm() {
             <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
               Location *
             </label>
-            <input
+            <Autocomplete
               id="location"
               name="location"
-              type="text"
               value={formData.location}
-              onChange={handleChange}
+              onChange={(value) => setFormData(prev => ({ ...prev, location: value }))}
+              suggestions={CITIES}
+              placeholder="e.g., Prague, Czech Republic"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Prague, Czech Republic"
             />
           </div>
         </div>

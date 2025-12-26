@@ -21,6 +21,7 @@ import reactionRoutes from './routes/reaction.routes';
 import commentRoutes from './routes/comment.routes';
 import savedJobRoutes from './routes/savedJob.routes';
 import skillEndorsementRoutes from './routes/skillEndorsement.routes';
+import cvParserRoutes from './routes/cvParser.routes';
 
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -61,6 +62,7 @@ app.use('/api', reactionRoutes);
 app.use('/api', commentRoutes);
 app.use('/api', savedJobRoutes);
 app.use('/api', skillEndorsementRoutes);
+app.use('/api', cvParserRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -214,6 +214,10 @@ export async function getJobs(req: AuthRequest, res: Response) {
       minSalary,
       maxSalary,
       skill,
+      experienceLevel,
+      educationLevel,
+      yearsExperience,
+      postedWithin, // in days
       status = 'OPEN',
       limit = '20',
       offset = '0',
@@ -242,12 +246,31 @@ export async function getJobs(req: AuthRequest, res: Response) {
       where.employmentType = employmentType as EmploymentType;
     }
 
+    if (experienceLevel) {
+      where.experienceLevel = experienceLevel as ExperienceLevel;
+    }
+
+    if (educationLevel) {
+      where.educationLevel = educationLevel as EducationLevel;
+    }
+
+    if (yearsExperience) {
+      where.yearsExperience = { lte: parseInt(yearsExperience as string) };
+    }
+
     if (minSalary) {
       where.salaryMin = { gte: parseFloat(minSalary as string) };
     }
 
     if (maxSalary) {
       where.salaryMax = { lte: parseFloat(maxSalary as string) };
+    }
+
+    if (postedWithin) {
+      const days = parseInt(postedWithin as string);
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      where.createdAt = { gte: date };
     }
 
     if (skill) {
