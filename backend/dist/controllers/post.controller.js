@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFeed = getFeed;
 exports.createPost = createPost;
 exports.getPost = getPost;
+exports.updatePost = updatePost;
+exports.deletePost = deletePost;
 const zod_1 = require("zod");
 const prisma_1 = __importDefault(require("../utils/prisma"));
 const client_1 = require("@prisma/client");
@@ -142,6 +144,74 @@ async function getPost(req, res) {
     }
     catch (error) {
         console.error('Get post error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+async function updatePost(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        const { postId } = req.params;
+        // Check if user owns this post
+        const existing = await prisma_1.default.post.findUnique({
+            where: { id: postId },
+        });
+        if (!existing || existing.authorId !== req.user.userId) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+        const data = createPostSchema.partial().parse(req.body);
+        const post = await prisma_1.default.post.update({
+            where: { id: postId },
+            data: {
+                title: data.title,
+                content: data.content,
+                mediaUrls: data.mediaUrls,
+                tags: data.tags,
+                visibility: data.visibility,
+            },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        displayName: true,
+                        headline: true,
+                        avatarUrl: true,
+                        roles: true,
+                    },
+                },
+            },
+        });
+        res.json({ post });
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({ error: 'Validation error', details: error.errors });
+        }
+        console.error('Update post error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+async function deletePost(req, res) {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        const { postId } = req.params;
+        // Check if user owns this post
+        const existing = await prisma_1.default.post.findUnique({
+            where: { id: postId },
+        });
+        if (!existing || existing.authorId !== req.user.userId) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+        await prisma_1.default.post.delete({
+            where: { id: postId },
+        });
+        res.json({ message: 'Post deleted' });
+    }
+    catch (error) {
+        console.error('Delete post error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 }

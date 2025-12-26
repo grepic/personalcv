@@ -40,5 +40,7 @@ const router = (0, express_1.Router)();
 router.get('/feed', auth_1.authenticate, postController.getFeed);
 router.post('/', auth_1.authenticate, postController.createPost);
 router.get('/:postId', postController.getPost);
+router.put('/:postId', auth_1.authenticate, postController.updatePost);
+router.delete('/:postId', auth_1.authenticate, postController.deletePost);
 exports.default = router;
 //# sourceMappingURL=post.routes.js.map

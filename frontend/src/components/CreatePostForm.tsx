@@ -1,19 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Post } from '../types';
 
 interface CreatePostFormProps {
+  post?: Post; // If provided, we're editing
   onPostCreated?: () => void;
   onCancel?: () => void;
 }
 
-export default function CreatePostForm({ onPostCreated, onCancel }: CreatePostFormProps) {
-  const [type, setType] = useState<'STATUS' | 'PORTFOLIO'>('STATUS');
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [tags, setTags] = useState('');
-  const [visibility, setVisibility] = useState<'public' | 'followers_only'>('public');
+export default function CreatePostForm({ post, onPostCreated, onCancel }: CreatePostFormProps) {
+  const isEditing = !!post;
+  const initialType = post?.type === 'STATUS' || post?.type === 'PORTFOLIO' ? post.type : 'STATUS';
+  const [type, setType] = useState<'STATUS' | 'PORTFOLIO'>(initialType);
+  const [title, setTitle] = useState(post?.title || '');
+  const [content, setContent] = useState(post?.content || '');
+  const [tags, setTags] = useState(post?.tags?.join(', ') || '');
+  const [visibility, setVisibility] = useState<'public' | 'followers_only'>(
+    (post?.visibility as 'public' | 'followers_only') || 'public'
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (post) {
+      const postType = post.type === 'STATUS' || post.type === 'PORTFOLIO' ? post.type : 'STATUS';
+      setType(postType);
+      setTitle(post.title || '');
+      setContent(post.content);
+      setTags(post.tags?.join(', ') || '');
+      setVisibility((post.visibility as 'public' | 'followers_only') || 'public');
+    }
+  }, [post]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,26 +38,34 @@ export default function CreatePostForm({ onPostCreated, onCancel }: CreatePostFo
     setLoading(true);
 
     try {
-      await api.post('/posts', {
+      const data = {
         type,
         title: title || undefined,
         content,
         tags: tags ? tags.split(',').map(t => t.trim()) : [],
         visibility,
-      });
+      };
 
-      // Reset form
-      setTitle('');
-      setContent('');
-      setTags('');
-      setType('STATUS');
-      setVisibility('public');
+      if (isEditing) {
+        await api.put(`/posts/${post.id}`, data);
+      } else {
+        await api.post('/posts', data);
+      }
+
+      // Reset form if creating
+      if (!isEditing) {
+        setTitle('');
+        setContent('');
+        setTags('');
+        setType('STATUS');
+        setVisibility('public');
+      }
 
       if (onPostCreated) {
         onPostCreated();
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create post');
+      setError(err.response?.data?.error || `Failed to ${isEditing ? 'update' : 'create'} post`);
     } finally {
       setLoading(false);
     }
@@ -48,7 +73,7 @@ export default function CreatePostForm({ onPostCreated, onCancel }: CreatePostFo
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
-      <h3 className="text-lg font-semibold mb-4">Create Post</h3>
+      <h3 className="text-lg font-semibold mb-4">{isEditing ? 'Edit Post' : 'Create Post'}</h3>
 
       {error && (
         <div className="mb-4 bg-red-50 text-red-600 p-3 rounded-md text-sm">
@@ -164,7 +189,7 @@ export default function CreatePostForm({ onPostCreated, onCancel }: CreatePostFo
             disabled={loading}
             className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition"
           >
-            {loading ? 'Posting...' : 'Post'}
+            {loading ? (isEditing ? 'Updating...' : 'Posting...') : (isEditing ? 'Update Post' : 'Post')}
           </button>
           {onCancel && (
             <button

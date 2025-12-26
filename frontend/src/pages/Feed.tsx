@@ -4,12 +4,15 @@ import api from '../services/api';
 import { Post } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 import CreatePostForm from '../components/CreatePostForm';
+import { useAuthStore } from '../store/authStore';
 
 export default function Feed() {
+  const { user } = useAuthStore();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
 
   useEffect(() => {
     loadPosts();
@@ -31,30 +34,81 @@ export default function Feed() {
     }
   };
 
-  const PostCard = ({ post }: { post: Post }) => (
-    <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
-      <div className="flex items-start gap-3 mb-4">
-        <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium flex-shrink-0">
-          {post.author.displayName.charAt(0).toUpperCase()}
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+
+    try {
+      await api.delete(`/posts/${postId}`);
+      loadPosts();
+    } catch (error) {
+      console.error('Delete post error:', error);
+      alert('Failed to delete post');
+    }
+  };
+
+  const PostCard = ({ post }: { post: Post }) => {
+    const isOwner = user?.id === post.author.id;
+    const isEditing = editingPost?.id === post.id;
+
+    if (isEditing) {
+      return (
+        <div className="mb-4">
+          <CreatePostForm
+            post={editingPost}
+            onPostCreated={() => {
+              setEditingPost(null);
+              loadPosts();
+            }}
+            onCancel={() => setEditingPost(null)}
+          />
         </div>
-        <div className="flex-1 min-w-0">
-          <Link
-            to={`/profile/${post.author.id}`}
-            className="font-semibold text-gray-900 hover:text-blue-600"
-          >
-            {post.author.displayName}
-          </Link>
-          {post.author.headline && (
-            <p className="text-sm text-gray-600">{post.author.headline}</p>
-          )}
-          <p className="text-xs text-gray-500">
-            {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
-          </p>
+      );
+    }
+
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium flex-shrink-0">
+            {post.author.displayName.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <Link
+              to={`/profile/${post.author.id}`}
+              className="font-semibold text-gray-900 hover:text-blue-600"
+            >
+              {post.author.displayName}
+            </Link>
+            {post.author.headline && (
+              <p className="text-sm text-gray-600">{post.author.headline}</p>
+            )}
+            <p className="text-xs text-gray-500">
+              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+              {post.type}
+            </span>
+            {isOwner && (
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setEditingPost(post)}
+                  className="text-sm text-blue-600 hover:text-blue-700 px-2 py-1"
+                  title="Edit"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeletePost(post.id)}
+                  className="text-sm text-red-600 hover:text-red-700 px-2 py-1"
+                  title="Delete"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-          {post.type}
-        </span>
-      </div>
 
       {post.title && <h3 className="text-lg font-semibold mb-2">{post.title}</h3>}
       <p className="text-gray-700 whitespace-pre-wrap mb-3">{post.content}</p>
@@ -85,8 +139,9 @@ export default function Feed() {
           )}
         </Link>
       )}
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
     <div>

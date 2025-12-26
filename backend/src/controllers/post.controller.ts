@@ -154,3 +154,82 @@ export async function getPost(req: AuthRequest, res: Response) {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export async function updatePost(req: AuthRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { postId } = req.params;
+
+    // Check if user owns this post
+    const existing = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existing || existing.authorId !== req.user.userId) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    const data = createPostSchema.partial().parse(req.body);
+
+    const post = await prisma.post.update({
+      where: { id: postId },
+      data: {
+        title: data.title,
+        content: data.content,
+        mediaUrls: data.mediaUrls,
+        tags: data.tags,
+        visibility: data.visibility,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            displayName: true,
+            headline: true,
+            avatarUrl: true,
+            roles: true,
+          },
+        },
+      },
+    });
+
+    res.json({ post });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Validation error', details: error.errors });
+    }
+    console.error('Update post error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export async function deletePost(req: AuthRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { postId } = req.params;
+
+    // Check if user owns this post
+    const existing = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existing || existing.authorId !== req.user.userId) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    await prisma.post.delete({
+      where: { id: postId },
+    });
+
+    res.json({ message: 'Post deleted' });
+  } catch (error) {
+    console.error('Delete post error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
