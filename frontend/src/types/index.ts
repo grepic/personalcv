@@ -248,3 +248,35 @@ export interface CandidateComment {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CompanyReview {
+  id: string;
+  companyId: string;
+  authorId: string;
+  author?: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+    headline?: string;
+  };
+  rating: number;
+  title: string;
+  content: string;
+  pros?: string;
+  cons?: string;
+  isVerifiedEmployee: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompanyReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
+}

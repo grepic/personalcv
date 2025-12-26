@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import { Job } from '../types';
 import { useAuthStore } from '../store/authStore';
@@ -8,7 +8,6 @@ import { formatDistanceToNow } from 'date-fns';
 export default function JobDetail() {
   const { jobId } = useParams();
   const { user } = useAuthStore();
-  const navigate = useNavigate();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);

@@ -5,6 +5,7 @@ import { UserProfile } from '../types';
 import { format } from 'date-fns';
 import { useAuthStore } from '../store/authStore';
 import FollowCompanyButton from '../components/FollowCompanyButton';
+import CompanyReviews from '../components/CompanyReviews';
 
 export default function Profile() {
   const { userId } = useParams();
@@ -209,6 +210,11 @@ export default function Profile() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Company Reviews */}
+      {isCompany && userId && (
+        <CompanyReviews companyId={userId} />
       )}
     </div>
   );

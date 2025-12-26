@@ -13,6 +13,7 @@ import followRoutes from './routes/follow.routes';
 import messageRoutes from './routes/message.routes';
 import candidateReviewRoutes from './routes/candidateReview.routes';
 import candidateCommentRoutes from './routes/candidateComment.routes';
+import companyReviewRoutes from './routes/companyReview.routes';
 
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -45,6 +46,7 @@ app.use('/api/follow', followRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api', candidateReviewRoutes);
 app.use('/api', candidateCommentRoutes);
+app.use('/api', companyReviewRoutes);
 
 // 404 handler
 app.use((req, res) => {

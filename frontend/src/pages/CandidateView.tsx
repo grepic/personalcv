@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
-import { UserProfile, CandidateReview, CandidateComment } from '../types';
+import { CandidateReview, CandidateComment } from '../types';
 import Profile from './Profile';
 import AddReviewForm from '../components/AddReviewForm';
 import AddCommentForm from '../components/AddCommentForm';

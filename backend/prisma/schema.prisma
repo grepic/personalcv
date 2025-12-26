@@ -126,6 +126,8 @@ model User {
   commentsReceived CandidateComment[] @relation("CommentCandidate")
   conversationParticipants ConversationParticipant[]
   messagesSent    Message[]
+  companyReviewsWritten CompanyReview[] @relation("ReviewAuthor")
+  companyReviewsReceived CompanyReview[] @relation("ReviewedCompany")
 
   @@index([email])
   @@index([roles])
@@ -443,6 +445,32 @@ model CandidateComment {
   @@index([jobId])
   @@index([authorId])
   @@index([parentCommentId])
+}
+
+// ============================================
+// COMPANY REVIEWS (Public Reviews by Users)
+// ============================================
+
+model CompanyReview {
+  id        String   @id @default(cuid())
+  companyId String
+  company   User     @relation("ReviewedCompany", fields: [companyId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  rating    Int      // 1-5 stars
+  title     String
+  content   String
+  pros      String?  // What you liked
+  cons      String?  // What you didn't like
+  isVerifiedEmployee Boolean @default(false) // If author worked there
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, authorId]) // One review per user per company
+  @@index([companyId])
+  @@index([authorId])
+  @@index([rating])
+  @@index([createdAt])
 }
 
 // ============================================

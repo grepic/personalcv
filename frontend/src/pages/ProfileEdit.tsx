@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { UserProfile, Experience, Education, UserSkill } from '../types';
+import { UserProfile } from '../types';
 
 export default function ProfileEdit() {
   const { user, updateUser } = useAuthStore();
@@ -21,7 +21,6 @@ export default function ProfileEdit() {
 
   // Form modes
   const [showAddExperience, setShowAddExperience] = useState(false);
-  const [showAddEducation, setShowAddEducation] = useState(false);
   const [showAddSkill, setShowAddSkill] = useState(false);
 
   useEffect(() => {
