@@ -52,6 +52,9 @@ export default function Jobs() {
             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
               {job.employmentType.replace('_', ' ')}
             </span>
+            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+              {job.experienceLevel.replace('_', ' ')}
+            </span>
           </div>
           {job.salaryMin && job.salaryMax && (
             <p className="text-gray-700 font-medium">

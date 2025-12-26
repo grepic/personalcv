@@ -14,6 +14,12 @@ export default function CreateJobForm() {
     salaryMax: '',
     currency: 'USD',
     skills: '',
+    experienceLevel: 'MID_LEVEL',
+    yearsExperience: '',
+    educationLevel: 'NOT_REQUIRED',
+    benefits: '',
+    applicationDeadline: '',
+    numberOfOpenings: '1',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,6 +40,12 @@ export default function CreateJobForm() {
         salaryMax: formData.salaryMax ? parseFloat(formData.salaryMax) : undefined,
         currency: formData.currency,
         skills: formData.skills ? formData.skills.split(',').map(s => s.trim()) : [],
+        experienceLevel: formData.experienceLevel,
+        yearsExperience: formData.yearsExperience ? parseInt(formData.yearsExperience) : undefined,
+        educationLevel: formData.educationLevel,
+        benefits: formData.benefits || undefined,
+        applicationDeadline: formData.applicationDeadline || undefined,
+        numberOfOpenings: formData.numberOfOpenings ? parseInt(formData.numberOfOpenings) : 1,
       });
 
       navigate(`/jobs/${data.job.id}`);
@@ -193,6 +205,114 @@ export default function CreateJobForm() {
               <option value="GBP">GBP</option>
             </select>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="experienceLevel" className="block text-sm font-medium text-gray-700 mb-1">
+              Experience Level *
+            </label>
+            <select
+              id="experienceLevel"
+              name="experienceLevel"
+              value={formData.experienceLevel}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="INTERNSHIP">Internship</option>
+              <option value="ENTRY_LEVEL">Entry Level</option>
+              <option value="JUNIOR">Junior</option>
+              <option value="MID_LEVEL">Mid-Level</option>
+              <option value="SENIOR">Senior</option>
+              <option value="LEAD">Lead</option>
+              <option value="EXECUTIVE">Executive</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="yearsExperience" className="block text-sm font-medium text-gray-700 mb-1">
+              Years of Experience (minimum)
+            </label>
+            <input
+              id="yearsExperience"
+              name="yearsExperience"
+              type="number"
+              min="0"
+              value={formData.yearsExperience}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="2"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="educationLevel" className="block text-sm font-medium text-gray-700 mb-1">
+              Education Level *
+            </label>
+            <select
+              id="educationLevel"
+              name="educationLevel"
+              value={formData.educationLevel}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="NOT_REQUIRED">Not Required</option>
+              <option value="HIGH_SCHOOL">High School</option>
+              <option value="VOCATIONAL">Vocational</option>
+              <option value="BACHELORS">Bachelor's Degree</option>
+              <option value="MASTERS">Master's Degree</option>
+              <option value="PHD">Ph.D.</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="numberOfOpenings" className="block text-sm font-medium text-gray-700 mb-1">
+              Number of Openings
+            </label>
+            <input
+              id="numberOfOpenings"
+              name="numberOfOpenings"
+              type="number"
+              min="1"
+              value={formData.numberOfOpenings}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="1"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="applicationDeadline" className="block text-sm font-medium text-gray-700 mb-1">
+            Application Deadline
+          </label>
+          <input
+            id="applicationDeadline"
+            name="applicationDeadline"
+            type="date"
+            value={formData.applicationDeadline}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="benefits" className="block text-sm font-medium text-gray-700 mb-1">
+            Benefits & Perks
+          </label>
+          <textarea
+            id="benefits"
+            name="benefits"
+            value={formData.benefits}
+            onChange={handleChange}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Health insurance, Flexible working hours, Professional development budget..."
+          />
         </div>
 
         <div>

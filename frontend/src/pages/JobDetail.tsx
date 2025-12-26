@@ -109,6 +109,41 @@ export default function JobDetail() {
         </div>
       )}
 
+      {/* Job Requirements & Details */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-1">Experience Level</h3>
+          <p className="text-gray-900">{job.experienceLevel.replace('_', ' ')}</p>
+        </div>
+        {job.yearsExperience !== undefined && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-600 mb-1">Years of Experience</h3>
+            <p className="text-gray-900">{job.yearsExperience}+ years</p>
+          </div>
+        )}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-1">Education</h3>
+          <p className="text-gray-900">{job.educationLevel.replace('_', ' ')}</p>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-1">Number of Openings</h3>
+          <p className="text-gray-900">{job.numberOfOpenings} position{job.numberOfOpenings > 1 ? 's' : ''}</p>
+        </div>
+        {job.applicationDeadline && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-600 mb-1">Application Deadline</h3>
+            <p className="text-gray-900">{formatDistanceToNow(new Date(job.applicationDeadline), { addSuffix: true })}</p>
+          </div>
+        )}
+      </div>
+
+      {job.benefits && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Benefits</h2>
+          <p className="text-gray-700 whitespace-pre-wrap">{job.benefits}</p>
+        </div>
+      )}
+
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-3">Job Description</h2>
         <p className="text-gray-700 whitespace-pre-wrap">{job.description}</p>

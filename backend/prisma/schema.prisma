@@ -39,6 +39,25 @@ enum JobStatus {
   CLOSED
 }
 
+enum ExperienceLevel {
+  INTERNSHIP
+  ENTRY_LEVEL
+  JUNIOR
+  MID_LEVEL
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum EducationLevel {
+  HIGH_SCHOOL
+  VOCATIONAL
+  BACHELORS
+  MASTERS
+  PHD
+  NOT_REQUIRED
+}
+
 enum ApplicationStatus {
   NEW
   VIEWED
@@ -346,32 +365,42 @@ model PostComment {
 // ============================================
 
 model Job {
-  id             String         @id @default(cuid())
-  companyId      String
-  company        User           @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  title          String
-  description    String
-  employmentType EmploymentType
-  location       String
-  isRemote       Boolean        @default(false)
-  salaryMin      Float?
-  salaryMax      Float?
-  currency       String?
-  status         JobStatus      @default(OPEN)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id               String          @id @default(cuid())
+  companyId        String
+  company          User            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title            String
+  description      String
+  employmentType   EmploymentType
+  location         String
+  isRemote         Boolean         @default(false)
+  salaryMin        Float?
+  salaryMax        Float?
+  currency         String?
+  status           JobStatus       @default(OPEN)
+
+  // New required fields
+  experienceLevel  ExperienceLevel
+  yearsExperience  Int?            // Minimum years of experience required
+  educationLevel   EducationLevel  @default(NOT_REQUIRED)
+  benefits         String?         // Comma-separated or JSON string
+  applicationDeadline DateTime?
+  numberOfOpenings Int             @default(1)
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   // Relations
-  skills         JobSkill[]
-  applications   Application[]
-  post           Post?
-  savedBy        SavedJob[]
+  skills           JobSkill[]
+  applications     Application[]
+  post             Post?
+  savedBy          SavedJob[]
 
   @@index([companyId])
   @@index([status])
   @@index([employmentType])
   @@index([location])
   @@index([isRemote])
+  @@index([experienceLevel])
   @@index([createdAt])
 }
 

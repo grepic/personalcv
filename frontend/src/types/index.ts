@@ -6,6 +6,10 @@ export type EmploymentType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHI
 
 export type JobStatus = 'OPEN' | 'CLOSED';
 
+export type ExperienceLevel = 'INTERNSHIP' | 'ENTRY_LEVEL' | 'JUNIOR' | 'MID_LEVEL' | 'SENIOR' | 'LEAD' | 'EXECUTIVE';
+
+export type EducationLevel = 'HIGH_SCHOOL' | 'VOCATIONAL' | 'BACHELORS' | 'MASTERS' | 'PHD' | 'NOT_REQUIRED';
+
 export type ApplicationStatus = 'NEW' | 'VIEWED' | 'INTERVIEW' | 'REJECTED' | 'HIRED';
 
 export type NotificationType = 'JOB_POSTED' | 'COMMENT' | 'MESSAGE' | 'PORTFOLIO_LIKE' | 'APPLICATION_UPDATE' | 'MENTION';
@@ -156,6 +160,15 @@ export interface Job {
   currency?: string;
   status: JobStatus;
   skills?: JobSkill[];
+
+  // New required fields
+  experienceLevel: ExperienceLevel;
+  yearsExperience?: number;
+  educationLevel: EducationLevel;
+  benefits?: string;
+  applicationDeadline?: string;
+  numberOfOpenings: number;
+
   createdAt: string;
   updatedAt: string;
 }

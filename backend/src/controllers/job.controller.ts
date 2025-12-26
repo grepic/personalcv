@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { z } from 'zod';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middlewares/auth';
-import { EmploymentType, JobStatus, PostType, Role } from '@prisma/client';
+import { EmploymentType, JobStatus, PostType, Role, ExperienceLevel, EducationLevel } from '@prisma/client';
 
 const createJobSchema = z.object({
   title: z.string(),
@@ -20,6 +20,29 @@ const createJobSchema = z.object({
   salaryMax: z.number().optional(),
   currency: z.string().optional(),
   skills: z.array(z.string()).optional(),
+
+  // New required fields
+  experienceLevel: z.enum([
+    ExperienceLevel.INTERNSHIP,
+    ExperienceLevel.ENTRY_LEVEL,
+    ExperienceLevel.JUNIOR,
+    ExperienceLevel.MID_LEVEL,
+    ExperienceLevel.SENIOR,
+    ExperienceLevel.LEAD,
+    ExperienceLevel.EXECUTIVE,
+  ]),
+  yearsExperience: z.number().int().min(0).optional(),
+  educationLevel: z.enum([
+    EducationLevel.HIGH_SCHOOL,
+    EducationLevel.VOCATIONAL,
+    EducationLevel.BACHELORS,
+    EducationLevel.MASTERS,
+    EducationLevel.PHD,
+    EducationLevel.NOT_REQUIRED,
+  ]).optional(),
+  benefits: z.string().optional(),
+  applicationDeadline: z.string().optional(), // ISO date string
+  numberOfOpenings: z.number().int().min(1).optional(),
 });
 
 export async function createJob(req: AuthRequest, res: Response) {
@@ -47,6 +70,12 @@ export async function createJob(req: AuthRequest, res: Response) {
         salaryMin: data.salaryMin,
         salaryMax: data.salaryMax,
         currency: data.currency,
+        experienceLevel: data.experienceLevel,
+        yearsExperience: data.yearsExperience,
+        educationLevel: data.educationLevel || EducationLevel.NOT_REQUIRED,
+        benefits: data.benefits,
+        applicationDeadline: data.applicationDeadline ? new Date(data.applicationDeadline) : null,
+        numberOfOpenings: data.numberOfOpenings || 1,
         skills: {
           create: (data.skills || []).map(name => ({ name })),
         },
