@@ -8,6 +8,7 @@ import FollowCompanyButton from '../components/FollowCompanyButton';
 import CompanyReviews from '../components/CompanyReviews';
 import PortfolioManager from '../components/PortfolioManager';
 import ServicesManager from '../components/ServicesManager';
+import Recommendations from '../components/Recommendations';
 
 export default function Profile() {
   const { userId } = useParams();
@@ -182,6 +183,11 @@ export default function Profile() {
       {/* Company Reviews */}
       {isCompany && userId && (
         <CompanyReviews companyId={userId} />
+      )}
+
+      {/* Recommendations */}
+      {userId && (
+        <Recommendations userId={userId} isOwnProfile={isOwnProfile} />
       )}
     </div>
   );

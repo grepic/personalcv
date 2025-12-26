@@ -128,6 +128,8 @@ model User {
   messagesSent    Message[]
   companyReviewsWritten CompanyReview[] @relation("ReviewAuthor")
   companyReviewsReceived CompanyReview[] @relation("ReviewedCompany")
+  recommendationsGiven Recommendation[] @relation("GivenRecommendations")
+  recommendationsReceived Recommendation[] @relation("ReceivedRecommendations")
 
   @@index([email])
   @@index([roles])
@@ -243,6 +245,29 @@ model FreelancerService {
   updatedAt    DateTime @updatedAt
 
   @@index([userId])
+}
+
+// ============================================
+// RECOMMENDATIONS
+// ============================================
+
+model Recommendation {
+  id              String   @id @default(cuid())
+  recipientId     String   // Person receiving the recommendation
+  recipient       User     @relation("ReceivedRecommendations", fields: [recipientId], references: [id], onDelete: Cascade)
+  authorId        String   // Company/person giving the recommendation
+  author          User     @relation("GivenRecommendations", fields: [authorId], references: [id], onDelete: Cascade)
+  relationship    String   // e.g., "Manager", "Colleague", "Client"
+  position        String?  // Position held at the company
+  content         String   // The recommendation text
+  isVisible       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([recipientId, authorId]) // One recommendation per company/person
+  @@index([recipientId])
+  @@index([authorId])
+  @@index([createdAt])
 }
 
 // ============================================

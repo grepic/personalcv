@@ -280,3 +280,23 @@ export interface CompanyReviewStats {
     5: number;
   };
 }
+
+export interface UserRecommendation {
+  id: string;
+  recipientId: string;
+  authorId: string;
+  author?: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+    companyName?: string;
+    headline?: string;
+    roles: Role[];
+  };
+  relationship: string;
+  position?: string;
+  content: string;
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

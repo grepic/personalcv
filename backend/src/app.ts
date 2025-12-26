@@ -16,6 +16,7 @@ import candidateCommentRoutes from './routes/candidateComment.routes';
 import companyReviewRoutes from './routes/companyReview.routes';
 import portfolioRoutes from './routes/portfolio.routes';
 import serviceRoutes from './routes/service.routes';
+import recommendationRoutes from './routes/recommendation.routes';
 
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -51,6 +52,7 @@ app.use('/api', candidateCommentRoutes);
 app.use('/api', companyReviewRoutes);
 app.use('/api', portfolioRoutes);
 app.use('/api', serviceRoutes);
+app.use('/api', recommendationRoutes);
 
 // 404 handler
 app.use((req, res) => {
