@@ -200,11 +200,37 @@ export const banUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const { reason } = req.body;
+    const adminId = (req as any).userId;
 
-    // You would typically add a 'banned' field to the User model
-    // For now, we can use a custom approach or just delete the user
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { roles: true, isBanned: true },
+    });
 
-    // TODO: Add banned field to schema and implement proper ban logic
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Prevent banning other admins
+    if (user.roles.includes('ADMIN')) {
+      return res.status(403).json({ error: 'Cannot ban admin users' });
+    }
+
+    if (user.isBanned) {
+      return res.status(400).json({ error: 'User is already banned' });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isBanned: true,
+        bannedAt: new Date(),
+        bannedBy: adminId,
+        banReason: reason || 'No reason provided',
+      },
+    });
+
+    // TODO: Invalidate all user's refresh tokens
 
     res.json({ message: 'User banned successfully', userId, reason });
   } catch (error) {
@@ -220,7 +246,28 @@ export const unbanUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
 
-    // TODO: Implement unban logic
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isBanned: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!user.isBanned) {
+      return res.status(400).json({ error: 'User is not banned' });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isBanned: false,
+        bannedAt: null,
+        bannedBy: null,
+        banReason: null,
+      },
+    });
 
     res.json({ message: 'User unbanned successfully', userId });
   } catch (error) {

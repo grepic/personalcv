@@ -18,6 +18,7 @@ enum Role {
   CANDIDATE
   FREELANCER
   COMPANY
+  ADMIN
 }
 
 enum PostType {
@@ -119,6 +120,29 @@ enum ConnectionStatus {
   REJECTED
 }
 
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum ReportType {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE_CONTENT
+  FAKE_PROFILE
+  FRAUD
+  OTHER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  SUSPENDED
+}
+
 // ============================================
 // USER & PROFILE
 // ============================================
@@ -135,6 +159,17 @@ model User {
   isLookingForJob Boolean   @default(false)
   isOfferingFreelance Boolean @default(false)
   templateId      String    @default("minimal_light")
+
+  // Security & Admin fields
+  isEmailVerified Boolean   @default(false)
+  isBanned        Boolean   @default(false)
+  bannedAt        DateTime?
+  bannedBy        String?
+  banReason       String?
+  lastLoginAt     DateTime?
+  failedLoginAttempts Int   @default(0)
+  lastFailedLoginAt DateTime?
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -175,11 +210,17 @@ model User {
   connectionsInitiated Connection[] @relation("ConnectionRequester")
   connectionsReceived  Connection[] @relation("ConnectionAddressee")
   pages           Page[]
+  subscriptions   CompanySubscription[]
+  reportsCreated  Report[] @relation("ReportCreator")
+  reportsReceived Report[] @relation("ReportedUser")
 
   @@index([email])
   @@index([roles])
   @@index([isLookingForJob])
   @@index([isOfferingFreelance])
+  @@index([isBanned])
+  @@index([isEmailVerified])
+  @@index([lastLoginAt])
 }
 
 model RefreshToken {
@@ -389,6 +430,7 @@ model PostReaction {
   @@unique([postId, userId]) // One reaction per user per post
   @@index([postId])
   @@index([userId])
+  @@index([postId, userId])
 }
 
 model PostComment {
@@ -502,6 +544,7 @@ model Application {
   @@index([candidateId])
   @@index([companyId])
   @@index([status])
+  @@index([companyId, status])
 }
 
 // ============================================
@@ -718,4 +761,78 @@ model Page {
 
   @@index([slug])
   @@index([isPublished])
+}
+
+// ============================================
+// COMPANY SUBSCRIPTIONS
+// ============================================
+
+model CompanySubscription {
+  id              String                  @id @default(cuid())
+  companyId       String
+  company         User                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan            CompanySubscriptionPlan
+  status          SubscriptionStatus      @default(ACTIVE)
+  startDate       DateTime                @default(now())
+  endDate         DateTime
+  renewalDate     DateTime?
+  cancelledAt     DateTime?
+  cancelReason    String?
+
+  // Payment tracking
+  paymentAmount   Float                   // Amount in CZK
+  paymentId       String?                 // Stripe/GoPay payment ID
+  lastPaymentDate DateTime?
+  nextBillingDate DateTime?
+
+  // Usage tracking
+  jobPostsUsed    Int                     @default(0)
+  jobPostsLimit   Int                     // Based on plan
+  cvViewsUsed     Int                     @default(0)
+  cvViewsLimit    Int                     // Based on plan
+
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+  @@index([endDate])
+  @@index([nextBillingDate])
+}
+
+// ============================================
+// REPORTING SYSTEM
+// ============================================
+
+model Report {
+  id              String       @id @default(cuid())
+  reporterId      String
+  reporter        User         @relation("ReportCreator", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUserId  String?
+  reportedUser    User?        @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reportedJobId   String?
+  reportedPostId  String?
+
+  type            ReportType
+  status          ReportStatus @default(PENDING)
+  reason          String
+  description     String?
+  evidence        String[]     // URLs to screenshots or evidence
+
+  // Admin review
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  reviewNotes     String?
+  resolution      String?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([reporterId])
+  @@index([reportedUserId])
+  @@index([reportedJobId])
+  @@index([reportedPostId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
 }
