@@ -25,6 +25,8 @@ import cvParserRoutes from './routes/cvParser.routes';
 import connectionRoutes from './routes/connection.routes';
 import uploadRoutes from './routes/upload.routes';
 import paymentRoutes from './routes/payment.routes';
+import seoRoutes from './routes/seo.routes';
+import adminRoutes from './routes/admin.routes';
 
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -72,6 +74,10 @@ app.use('/api', cvParserRoutes);
 app.use('/api/connections', connectionRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/admin', adminRoutes);
+
+// SEO routes (no /api prefix)
+app.use(seoRoutes);
 
 // 404 handler
 app.use((req, res) => {
