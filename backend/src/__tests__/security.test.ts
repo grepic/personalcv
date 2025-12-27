@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../app';
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -71,7 +71,7 @@ describe('Security Middleware', () => {
       // Assign ADMIN role
       await prisma.user.update({
         where: { email: adminUser.email },
-        data: { roles: [Role.ADMIN] },
+        data: { roles: ['ADMIN'] },
       });
     });
 

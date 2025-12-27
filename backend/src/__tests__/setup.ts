@@ -3,11 +3,6 @@ import { PrismaClient } from '@prisma/client';
 // Increase timeout for database operations
 jest.setTimeout(10000);
 
-// Mock Prisma Client for tests
-jest.mock('../lib/prisma', () => ({
-  prisma: new PrismaClient(),
-}));
-
 // Mock email service to prevent actual emails in tests
 jest.mock('../services/emailService', () => ({
   emailService: {

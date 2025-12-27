@@ -35,6 +35,16 @@ Comprehensive testing setup for the NetworkHub backend API.
    - CORS headers
    - Body size limits
 
+## ⚙️ Prerequisites
+
+Before running tests, ensure the Prisma Client is generated:
+
+```bash
+npx prisma generate
+```
+
+**Note:** The Prisma Client must be regenerated after any schema changes. If you see errors like "@prisma/client did not initialize yet", run the command above.
+
 ## 🚀 Running Tests
 
 ### All Tests
@@ -247,11 +257,18 @@ psql -U postgres -c "CREATE DATABASE networking_platform_test;"
 **Solution:** Tests don't actually start the server, they use supertest which handles this.
 
 ### Issue: Prisma Client Not Generated
+**Symptoms:** Error message "@prisma/client did not initialize yet"
+
 **Solution:**
 ```bash
+# Generate Prisma Client
 npx prisma generate
+
+# Run tests
 npm test
 ```
+
+**Important:** After schema changes (adding/modifying models, enums, or fields in `prisma/schema.prisma`), you MUST regenerate the Prisma Client before running tests. The tests import types (like `Role`, `ReportType`, `ReportStatus`) from `@prisma/client` which are only available after generation.
 
 ## 🔄 CI/CD Integration
 
@@ -266,6 +283,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
       - run: npm install
+      - run: npx prisma generate
       - run: npm run test:ci
 ```
 
@@ -275,6 +293,7 @@ test:
   image: node:18
   script:
     - npm install
+    - npx prisma generate
     - npm run test:ci
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
 ```

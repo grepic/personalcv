@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../app';
-import { PrismaClient, Role, ReportType, ReportStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -69,7 +69,7 @@ describe('Reporting System', () => {
     // Make user an admin
     await prisma.user.update({
       where: { email: adminUser.email },
-      data: { roles: [Role.ADMIN] },
+      data: { roles: ['ADMIN'] },
     });
   });
 
@@ -102,7 +102,7 @@ describe('Reporting System', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           reportedUserId: reportedUserId,
-          type: ReportType.SPAM,
+          type: 'SPAM',
           reason: 'This user is posting spam content repeatedly',
           description: 'Detailed description of spam behavior',
           evidence: ['https://example.com/screenshot1.png'],
@@ -110,8 +110,8 @@ describe('Reporting System', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('type', ReportType.SPAM);
-      expect(response.body).toHaveProperty('status', ReportStatus.PENDING);
+      expect(response.body).toHaveProperty('type', 'SPAM');
+      expect(response.body).toHaveProperty('status', 'PENDING');
       expect(response.body.reporter).toHaveProperty('email', testUser.email);
       expect(response.body.reportedUser).toHaveProperty('email', reportedUser.email);
 
@@ -123,7 +123,7 @@ describe('Reporting System', () => {
         .post('/api/reports')
         .send({
           reportedUserId: reportedUserId,
-          type: ReportType.SPAM,
+          type: 'SPAM',
           reason: 'Spam content',
         })
         .expect(401);
@@ -135,7 +135,7 @@ describe('Reporting System', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           reportedUserId: userId,
-          type: ReportType.SPAM,
+          type: 'SPAM',
           reason: 'Trying to report myself',
         })
         .expect(400);
@@ -149,7 +149,7 @@ describe('Reporting System', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           reportedUserId: reportedUserId,
-          type: ReportType.SPAM,
+          type: 'SPAM',
           reason: 'Another spam report',
         })
         .expect(400);
@@ -163,7 +163,7 @@ describe('Reporting System', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           reportedUserId: reportedUserId,
-          type: ReportType.SPAM,
+          type: 'SPAM',
           reason: 'Short',
         })
         .expect(400);
@@ -176,7 +176,7 @@ describe('Reporting System', () => {
         .post('/api/reports')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
-          type: ReportType.SPAM,
+          type: 'SPAM',
           reason: 'Report without target',
         })
         .expect(400);
@@ -285,12 +285,12 @@ describe('Reporting System', () => {
           .put(`/api/admin/reports/${reportId}`)
           .set('Authorization', `Bearer ${adminToken}`)
           .send({
-            status: ReportStatus.REVIEWING,
+            status: 'REVIEWING',
             reviewNotes: 'Under investigation',
           })
           .expect(200);
 
-        expect(response.body).toHaveProperty('status', ReportStatus.REVIEWING);
+        expect(response.body).toHaveProperty('status', 'REVIEWING');
         expect(response.body).toHaveProperty('reviewNotes', 'Under investigation');
         expect(response.body).toHaveProperty('reviewedAt');
       });
@@ -300,12 +300,12 @@ describe('Reporting System', () => {
           .put(`/api/admin/reports/${reportId}`)
           .set('Authorization', `Bearer ${adminToken}`)
           .send({
-            status: ReportStatus.RESOLVED,
+            status: 'RESOLVED',
             resolution: 'User has been warned and content removed',
           })
           .expect(200);
 
-        expect(response.body).toHaveProperty('status', ReportStatus.RESOLVED);
+        expect(response.body).toHaveProperty('status', 'RESOLVED');
         expect(response.body).toHaveProperty('resolution');
       });
 
