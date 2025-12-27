@@ -22,6 +22,9 @@ import commentRoutes from './routes/comment.routes';
 import savedJobRoutes from './routes/savedJob.routes';
 import skillEndorsementRoutes from './routes/skillEndorsement.routes';
 import cvParserRoutes from './routes/cvParser.routes';
+import connectionRoutes from './routes/connection.routes';
+import uploadRoutes from './routes/upload.routes';
+import paymentRoutes from './routes/payment.routes';
 
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -37,6 +40,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Health check
 app.get('/health', (req, res) => {
@@ -63,6 +69,9 @@ app.use('/api', commentRoutes);
 app.use('/api', savedJobRoutes);
 app.use('/api', skillEndorsementRoutes);
 app.use('/api', cvParserRoutes);
+app.use('/api/connections', connectionRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // 404 handler
 app.use((req, res) => {

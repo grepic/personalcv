@@ -18,6 +18,7 @@ import CreateJob from './pages/CreateJob';
 import CandidateView from './pages/CandidateView';
 import ProfileEdit from './pages/ProfileEdit';
 import Search from './pages/Search';
+import Network from './pages/Network';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -81,6 +82,7 @@ function App() {
           <Route path="profile/:userId" element={<Profile />} />
           <Route path="profile/edit" element={<ProfileEdit />} />
           <Route path="messages" element={<Messages />} />
+          <Route path="network" element={<Network />} />
           <Route path="settings" element={<Settings />} />
           <Route path="search" element={<Search />} />
           <Route path="company/jobs" element={<CompanyJobs />} />

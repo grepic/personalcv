@@ -5,6 +5,7 @@ import { UserProfile } from '../types';
 import { format } from 'date-fns';
 import { useAuthStore } from '../store/authStore';
 import FollowCompanyButton from '../components/FollowCompanyButton';
+import ConnectionButton from '../components/ConnectionButton';
 import CompanyReviews from '../components/CompanyReviews';
 import PortfolioManager from '../components/PortfolioManager';
 import ServicesManager from '../components/ServicesManager';
@@ -60,8 +61,11 @@ export default function Profile() {
             <div className="flex items-start justify-between">
               <h1 className="text-3xl font-bold mb-2">{profile.displayName}</h1>
               <div className="flex gap-2">
-                {!isOwnProfile && isCompany && userId && (
-                  <FollowCompanyButton companyId={userId} />
+                {!isOwnProfile && userId && (
+                  <>
+                    <ConnectionButton userId={userId} onConnectionChange={loadProfile} />
+                    {isCompany && <FollowCompanyButton companyId={userId} />}
+                  </>
                 )}
                 {isOwnProfile && (
                   <Link

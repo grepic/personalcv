@@ -86,6 +86,8 @@ enum NotificationType {
   PORTFOLIO_LIKE
   APPLICATION_UPDATE
   MENTION
+  CONNECTION_REQUEST
+  CONNECTION_ACCEPTED
 }
 
 enum Recommendation {
@@ -109,6 +111,12 @@ enum CompanySize {
   SIZE_51_200
   SIZE_201_1000
   SIZE_1000_PLUS
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 // ============================================
@@ -164,6 +172,8 @@ model User {
   recommendationsReceived Recommendation[] @relation("ReceivedRecommendations")
   postComments    PostComment[]
   savedJobs       SavedJob[]
+  connectionsInitiated Connection[] @relation("ConnectionRequester")
+  connectionsReceived  Connection[] @relation("ConnectionAddressee")
 
   @@index([email])
   @@index([roles])
@@ -181,6 +191,28 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+}
+
+// ============================================
+// USER CONNECTIONS (Networking)
+// ============================================
+
+model Connection {
+  id           String           @id @default(cuid())
+  requesterId  String
+  requester    User             @relation("ConnectionRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId  String
+  addressee    User             @relation("ConnectionAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  status       ConnectionStatus @default(PENDING)
+  message      String?          // Optional message with connection request
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([requesterId, addresseeId])
+  @@index([requesterId])
+  @@index([addresseeId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // ============================================
