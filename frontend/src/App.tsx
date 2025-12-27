@@ -19,6 +19,10 @@ import CandidateView from './pages/CandidateView';
 import ProfileEdit from './pages/ProfileEdit';
 import Search from './pages/Search';
 import Network from './pages/Network';
+import DynamicPage from './pages/DynamicPage';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import SeoSettings from './pages/Admin/SeoSettings';
+import PageEditor from './pages/Admin/PageEditor';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -88,6 +92,14 @@ function App() {
           <Route path="company/jobs" element={<CompanyJobs />} />
           <Route path="company/jobs/create" element={<CreateJob />} />
           <Route path="candidates/:candidateId" element={<CandidateView />} />
+
+          {/* Admin Routes */}
+          <Route path="admin" element={<AdminDashboard />} />
+          <Route path="admin/seo" element={<SeoSettings />} />
+          <Route path="admin/pages" element={<PageEditor />} />
+
+          {/* Dynamic CMS Pages */}
+          <Route path="pages/:slug" element={<DynamicPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

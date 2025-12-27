@@ -27,6 +27,7 @@ import uploadRoutes from './routes/upload.routes';
 import paymentRoutes from './routes/payment.routes';
 import seoRoutes from './routes/seo.routes';
 import adminRoutes from './routes/admin.routes';
+import cmsRoutes from './routes/cms.routes';
 
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -78,6 +79,9 @@ app.use('/api/admin', adminRoutes);
 
 // SEO routes (no /api prefix)
 app.use(seoRoutes);
+
+// CMS routes
+app.use('/api/cms', cmsRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -93,28 +93,52 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ActionCard
-            title="User Management"
-            description="View and manage all users"
-            link="/admin/users"
-            icon="👤"
-            color="primary"
-          />
-          <ActionCard
-            title="Job Management"
-            description="Moderate job postings"
-            link="/admin/jobs"
-            icon="💼"
-            color="secondary"
-          />
-          <ActionCard
-            title="Analytics"
-            description="View platform analytics"
-            link="/admin/analytics"
-            icon="📊"
-            color="success"
-          />
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Platform Management</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <ActionCard
+              title="User Management"
+              description="View and manage all users"
+              link="/admin/users"
+              icon="👤"
+              color="primary"
+            />
+            <ActionCard
+              title="Job Management"
+              description="Moderate job postings"
+              link="/admin/jobs"
+              icon="💼"
+              color="secondary"
+            />
+            <ActionCard
+              title="Analytics"
+              description="View platform analytics"
+              link="/admin/analytics"
+              icon="📊"
+              color="success"
+            />
+          </div>
+        </div>
+
+        {/* Content Management */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Content & SEO</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ActionCard
+              title="SEO Settings"
+              description="Manage meta tags and SEO for each page"
+              link="/admin/seo"
+              icon="🔍"
+              color="primary"
+            />
+            <ActionCard
+              title="Page Management"
+              description="Create and edit static pages (About, Privacy, etc.)"
+              link="/admin/pages"
+              icon="📄"
+              color="secondary"
+            />
+          </div>
         </div>
       </div>
     </div>
