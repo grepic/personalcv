@@ -18,21 +18,35 @@ export async function getNotifications(req: AuthRequest, res: Response) {
       where.isRead = false;
     }
 
-    const notifications = await prisma.notification.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: parseInt(limit as string),
-      skip: parseInt(offset as string),
-    });
+    const limitNum = parseInt(limit as string);
+    const offsetNum = parseInt(offset as string);
 
-    const unreadCount = await prisma.notification.count({
-      where: {
-        userId: req.user.userId,
-        isRead: false,
+    const [notifications, total, unreadCount] = await Promise.all([
+      prisma.notification.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limitNum,
+        skip: offsetNum,
+      }),
+      prisma.notification.count({ where }),
+      prisma.notification.count({
+        where: {
+          userId: req.user.userId,
+          isRead: false,
+        },
+      }),
+    ]);
+
+    res.json({
+      notifications,
+      unreadCount,
+      pagination: {
+        total,
+        limit: limitNum,
+        offset: offsetNum,
+        hasMore: offsetNum + limitNum < total,
       },
     });
-
-    res.json({ notifications, unreadCount });
   } catch (error) {
     console.error('Get notifications error:', error);
     res.status(500).json({ error: 'Internal server error' });

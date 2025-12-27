@@ -1,9 +1,48 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth';
 import prisma from '../utils/prisma';
+import pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
 
 // Simple CV parser using regex patterns
 // In production, you'd use a more sophisticated library or AI service
+
+/**
+ * Extract text from different file formats
+ */
+async function extractTextFromFile(buffer: Buffer, mimetype: string): Promise<string> {
+  try {
+    // PDF files
+    if (mimetype === 'application/pdf') {
+      const data = await pdfParse(buffer);
+      return data.text;
+    }
+
+    // DOCX files
+    if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value;
+    }
+
+    // DOC files (older format) - fallback to binary parsing
+    if (mimetype === 'application/msword') {
+      // Basic text extraction from binary
+      const text = buffer.toString('latin1');
+      // Remove non-printable characters
+      return text.replace(/[^\x20-\x7E\n]/g, ' ');
+    }
+
+    // Plain text files
+    if (mimetype === 'text/plain') {
+      return buffer.toString('utf-8');
+    }
+
+    throw new Error(`Unsupported file type: ${mimetype}`);
+  } catch (error) {
+    console.error('Error extracting text from file:', error);
+    throw new Error('Failed to parse file. Please ensure it\'s a valid PDF, DOC, or DOCX file.');
+  }
+}
 
 interface ParsedCV {
   experiences: Array<{
@@ -160,10 +199,13 @@ export async function uploadAndParseCV(req: AuthRequest, res: Response) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    // For now, we'll parse the file as text
-    // In production, you'd use libraries like pdf-parse, mammoth, etc.
-    const fileBuffer = req.file.buffer;
-    const fileText = fileBuffer.toString('utf-8'); // This won't work for PDF/DOC, just placeholder
+    // Extract text from file based on file type
+    let fileText: string;
+    try {
+      fileText = await extractTextFromFile(req.file.buffer, req.file.mimetype);
+    } catch (error: any) {
+      return res.status(400).json({ error: error.message || 'Failed to parse CV file' });
+    }
 
     // Parse CV
     const parsedData: ParsedCV = {

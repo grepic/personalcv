@@ -44,38 +44,52 @@ export async function getFeed(req: AuthRequest, res: Response) {
       { authorId: req.user.userId },
     ];
 
-    const posts = await prisma.post.findMany({
-      where,
-      include: {
-        author: {
-          select: {
-            id: true,
-            displayName: true,
-            headline: true,
-            avatarUrl: true,
-            roles: true,
-            companyName: true,
-          },
-        },
-        job: {
-          select: {
-            id: true,
-            title: true,
-            location: true,
-            isRemote: true,
-            employmentType: true,
-            salaryMin: true,
-            salaryMax: true,
-            currency: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: parseInt(limit as string),
-      skip: parseInt(offset as string),
-    });
+    const limitNum = parseInt(limit as string);
+    const offsetNum = parseInt(offset as string);
 
-    res.json({ posts });
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        include: {
+          author: {
+            select: {
+              id: true,
+              displayName: true,
+              headline: true,
+              avatarUrl: true,
+              roles: true,
+              companyName: true,
+            },
+          },
+          job: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              isRemote: true,
+              employmentType: true,
+              salaryMin: true,
+              salaryMax: true,
+              currency: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limitNum,
+        skip: offsetNum,
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    res.json({
+      posts,
+      pagination: {
+        total,
+        limit: limitNum,
+        offset: offsetNum,
+        hasMore: offsetNum + limitNum < total,
+      },
+    });
   } catch (error) {
     console.error('Get feed error:', error);
     res.status(500).json({ error: 'Internal server error' });
