@@ -58,6 +58,19 @@ enum EducationLevel {
   NOT_REQUIRED
 }
 
+enum JobPricingTier {
+  FREE           // 7 dní, basic listing
+  STANDARD       // 30 dní, 4990 Kč
+  FEATURED       // 30 dní, 9990 Kč, zvýrazněné
+  PREMIUM        // 60 dní, 14990 Kč, top placement
+}
+
+enum CompanySubscriptionPlan {
+  FREE           // 1 job/měsíc
+  PROFESSIONAL   // 7990 Kč/měsíc - 5 jobs, 20 CV views
+  ENTERPRISE     // 24990 Kč/měsíc - unlimited
+}
+
 enum ApplicationStatus {
   NEW
   VIEWED
@@ -378,13 +391,20 @@ model Job {
   currency         String?
   status           JobStatus       @default(OPEN)
 
-  // New required fields
+  // Required fields
   experienceLevel  ExperienceLevel
-  yearsExperience  Int?            // Minimum years of experience required
+  yearsExperience  Int?
   educationLevel   EducationLevel  @default(NOT_REQUIRED)
-  benefits         String?         // Comma-separated or JSON string
+  benefits         String?
   applicationDeadline DateTime?
   numberOfOpenings Int             @default(1)
+
+  // Pricing & Monetization
+  pricingTier      JobPricingTier  @default(FREE)
+  expiresAt        DateTime?       // Auto-calculated based on tier
+  isPaid           Boolean         @default(false)
+  paidAt           DateTime?
+  paymentAmount    Float?          // Amount paid in CZK
 
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
